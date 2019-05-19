@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Yahoo天気API</title>
+    <link rel="stylesheet" href="yahoo_tenki.css">
+    <script src="js/jquery-2.1.3.min.js"></script>
+    <script>
+        $(function () {
+            // YAHOO天気APIに必要
+            async function showWeather() {
+                // http://developer.yahoo.co.jp/ の「アプリケーション管理」で取得！
+                const appid = "********************************";
+                const position = await getPosition(); //経度、緯度（唐木田周辺）
+                const coord = position.coords.longitude + "," + position.coords.latitude;
+                //-----------------------------------
+                //getJSON[開始]
+                //-----------------------------------    
+                const url = "http://weather.olp.yahooapis.jp/v1/place?callback=?&coordinates=";
+                $.getJSON(url + coord + "&output=jsonp&appid=" + appid, function (data) {
+                    //-----------------------------------
+                    //JSONデータ確認用
+                    //-----------------------------------
+                    //-----------------------------------
+                    //必要なデータ（JSON）を取得
+                    //-----------------------------------
+                    const d = data.Feature[0].Property.WeatherList.Weather[0].Date;
+                    const r0 = data.Feature[0].Property.WeatherList.Weather[0].Rainfall;
+                    const r1 = data.Feature[0].Property.WeatherList.Weather[1].Rainfall;
+                    const r2 = data.Feature[0].Property.WeatherList.Weather[2].Rainfall;
+                    const r3 = data.Feature[0].Property.WeatherList.Weather[3].Rainfall;
+                    const r4 = data.Feature[0].Property.WeatherList.Weather[4].Rainfall;
+                    const r5 = data.Feature[0].Property.WeatherList.Weather[5].Rainfall;
+                    //-----------------------------------
+                    //HTMLに表示
+                    //-----------------------------------
+                    $("#date").html("日付：" + d);
+                    $("#rain0").html("降水強度予測値：今現在=" + r0 + "(mm/h)");
+                    $("#rain1").html("降水強度予測値：10分後=" + r1 + "(mm/h)");
+                    $("#rain2").html("降水強度予測値：20分後=" + r2 + "(mm/h)");
+                    $("#rain3").html("降水強度予測値：30分後=" + r3 + "(mm/h)");
+                    $("#rain4").html("降水強度予測値：40分後=" + r4 + "(mm/h)");
+                    $("#rain5").html("降水強度予測値：50分後=" + r5 + "(mm/h)");
+                });
+            }
+            showWeather();
+            //-----------------------------------
+            //getJSON[END]
+            //Main:位置情報を取得する処理 //getCurrentPosition :or: watchPosition
+            var lat;
+            var lon;
+            //1．位置情報の取得に成功した時の処理
+            //                function mapsInit(position) {
+            //                    //lat=緯度、lon=経度 を取得
+            //                            lat = position.coords.latitude;
+            //                            lon = position.coords.longitude;
+            //                            $("#view").html("緯度" + lat + "," + "経度" + lon);
+            //                            lat2 = String(lat);
+            //                            lon2 = String(lon);
+            //                            
+            //                    // lat += 0.00000079999999
+            //                    // lon += 0.00000079999999 
+            //2． 位置情報の取得に失敗した場合の処理
+            function mapsError(error) {
+                let e = "";
+                if (error.code == 1) { //1＝位置情報取得が許可されてない（ブラウザの設定）
+                    e = "位置情報が許可されてません";
+                }
+                if (error.code == 2) { //2＝現在地を特定できない
+                    e = "現在位置を特定できません";
+                }
+                if (error.code == 3) { //3＝位置情報を取得する前にタイムアウトになった場合
+                    e = "位置情報を取得する前にタイムアウトになりました";
+                }
+                alert("エラー：" + e);
+            };
+            //3.位置情報取得オプション
+            var options = {
+                enableHighAccuracy: true, //より高精度な位置を求める
+                maximumAge: 20000, //最後の現在地情報取得が20秒以内であればその情報を再利用する設定
+                timeout: 10000 //10秒以内に現在地情報を取得できなければ、処理を終了
+            };
+
+            function getPosition(options) {
+                return new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, options)
+                })
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>天気予報アプリ</h1></header>
+    <!-- jQuery&GoogleMapsAPI -->
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <!-- /jQuery&GoogleMapsAPI -->
+    <main>
+        <div id="box">
+            <p id="date">ここに表示されます</p>
+            <p id="rain0">ここに表示されます</p>
+            <p id="rain1">ここに表示されます</p>
+            <p id="rain2">ここに表示されます</p>
+            <p id="rain3">ここに表示されます</p>
+            <p id="rain4">ここに表示されます</p>
+            <p id="rain5">ここに表示されます</p>
+        </div>
+    </main>
+    <!-- MapArea -->
+    <div id="view"></div>
+    <div id="myMap"></div>
+    <!-- /MapArea -->
+</body>
+
+</html>
